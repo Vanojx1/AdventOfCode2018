@@ -1,5 +1,4 @@
 import re
-from cStringIO import StringIO
 
 puzzleInput = open('input.txt', 'r').read()
 
