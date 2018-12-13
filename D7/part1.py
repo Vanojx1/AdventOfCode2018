@@ -1,28 +1,37 @@
 import re
-import numpy as np
 
 puzzleInput = open('input.txt', 'r').read().split('\n')
 
 instructions = map(lambda i: re.findall(r' (\w) ', i), puzzleInput)
 
-priors = {}
-for (A, B) in instructions:
-  if A not in priors:
-    priors[A] = 0
-  if B not in priors:
-    priors[B] = 0
-  priors[A]+=1
-  priors[B]-=1
+steps = {}
+for a, b in instructions:
+  if b not in steps:
+    steps[b] = set()
+  steps[b].add(a)
 
-def comparator((ka, va), (kb, vb)):
-  if va == vb:
-    if kb > ka:
-      return -1
-    else:
-      return 1 
+def todo(currSteps):
+  t = set()
+  if isinstance(currSteps, dict):
+    for k, v in currSteps.iteritems():
+      if len(v) == 0:
+        t.add(k)
+      else:
+        t = t | todo(list(v))
   else:
-    return vb - va
+    for k in currSteps:
+      if k not in steps:
+        t.add(k)
+  return t
 
-print instructions
-print ''.join(map(lambda (k, v): k, sorted(priors.iteritems(), cmp=comparator)))
+result  = ''
+curr = todo(steps)
+while len(curr) > 0:
+  ck = sorted(curr).pop(0)
+  result += ck
+  steps = { k: v for k, v in steps.iteritems() if len(v) > 0 }
+  for k, v in steps.iteritems():
+    steps[k] = steps[k].difference(set(ck))
+  curr = todo(steps)
 
+print 'Result: %s' % result
